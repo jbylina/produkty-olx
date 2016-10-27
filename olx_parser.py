@@ -6,7 +6,8 @@ import csv
 def save_to_csv(array):
     with open('olxWyniki.csv', 'w') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC)
-        writer.writerow(array)
+        for item in array:
+            writer.writerow(item)
 
 
 results = []
