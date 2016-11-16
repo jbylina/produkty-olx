@@ -13,7 +13,7 @@ def save_to_csv(array):
 
 results = []
 
-for i in range(500, 1):
+for i in range(1, 2):
     request = requests.get("http://www.olx.pl/uslugi-firmy/piaseczno/?page=" + str(i))
     soup = BeautifulSoup(request.text, "html.parser")
 
@@ -31,8 +31,11 @@ for i in range(500, 1):
         bottomBarChildren = bottomBar.findAll('div', {'class': 'pdingtop10'})
         offer_count = bottomBarChildren[1].text.strip().split('Wyświetleń:', 1)[1]
 
-        id = soup2.find('span', {'class': 'rel inlblk'}).text
+        # text_with_id example value: 'ID ogłoszenia: 1234423432'
+        text_with_offer_id = soup2.find('div', {'class': 'offer-titlebox__details'}).find('small').text
 
-        results.append([int(id), url, strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count)])
+        offer_id = text_with_offer_id.strip().split(" ")[-1]
+
+        results.append([int(offer_id), url, strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count)])
 
 save_to_csv(results)
