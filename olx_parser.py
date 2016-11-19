@@ -2,14 +2,23 @@ from bs4 import BeautifulSoup
 from time import gmtime, strftime
 import requests
 import csv
-
+import pandas as pd
+import os.path
 
 def save_to_csv(array):
-    with open('olxWyniki.csv', 'a') as file:
+    with open('OLX_actual_hour.csv', 'a') as file:
         writer = csv.writer(file, quoting=csv.QUOTE_NONNUMERIC)
         for item in array:
             writer.writerow(item)
 
+
+# save to 2 files
+if (os.path.isfile('OLX_actual_hour.csv')):
+    df = pd.read_csv('OLX_actual_hour.csv')
+    df.to_csv('OLX_one_hour_ago.csv',index=False)
+    f = open("OLX_actual_hour.csv","w")
+    f.truncate()
+    f.close()
 
 results = []
 
