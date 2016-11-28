@@ -20,6 +20,14 @@ if (os.path.isfile('OLX_actual_hour.csv')):
     f.truncate()
     f.close()
 
+# sprawdzanie liczby stron - zrobił Dominik
+def ile_stron(adres):
+    import requests
+    r = requests.get(adres)
+    dest=r.history[0].headers['Location']
+    return dest.split('?page=')[1]
+
+
 results = []
 
 for i in range(1, 2):
