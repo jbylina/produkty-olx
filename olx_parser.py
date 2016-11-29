@@ -5,6 +5,17 @@ import csv
 import pandas as pd
 import os.path
 from apscheduler.schedulers.blocking import BlockingScheduler
+from shutil import copyfile
+
+
+def save_to_csv(array):
+    file_new = 'OLX_actual_hour.csv'
+    file_old = 'OLX_one_hour_ago.csv'
+    copyfile(file_new, file_old)
+    f = open(file_new, "w")
+    writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
+    for item in array:
+        writer.writerow(item)
 
 
 # task that will run each hour (or nother const time)
@@ -39,27 +50,21 @@ def check_views():
     save_to_csv(results)
 
 
-scheduler = BlockingScheduler()
-scheduler.add_job(check_views, 'interval', minutes=2)
-scheduler.start()
+#scheduler = BlockingScheduler()
+#scheduler.add_job(check_views, 'interval', minutes=2)
+#scheduler.start()
+check_views()
 
 
-def save_to_csv(array):
-    if os.path.isfile('OLX_actual_hour.csv'):
-        writer = csv.writer('OLX_actual_hour.csv', quoting=csv.QUOTE_NONNUMERIC)
-        for item in array:
-            writer.writerow(item)
-        df = pd.read_csv('OLX_actual_hour.csv')
-        df.to_csv('OLX_one_hour_ago.csv', index=False)
-        f = open("OLX_actual_hour.csv", "w")
-        f.truncate()
-        f.close()
-
+# if os.path.isfile('OLX_actual_hour.csv'):
+#    writer = csv.writer('OLX_actual_hour.csv', quoting=csv.QUOTE_NONNUMERIC)
+#    for item in array:
+#        writer.writerow(item)
 
 # sprawdzanie liczby stron - zrobił Dominik
-def page_count(adress):
+def page_count(address):
     import requests
-    r = requests.get(adress)
+    r = requests.get(address)
     dest=r.history[0].headers['Location']
     return dest.split('?page=')[1]
 
