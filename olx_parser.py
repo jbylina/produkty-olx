@@ -13,6 +13,8 @@ import sys
 #importlib.reload(sys)
 #sys.setdefaultencoding('utf8')
 
+adress = "http://www.olx.pl/uslugi-firmy/warszawa/?search%5Bdistrict_id%5D=353&page="
+
 def save_to_csv(array):
     file_new = sys.argv[1] + 'OLX_actual_hour.csv'
     file_old = sys.argv[1] + 'OLX_one_hour_ago.csv'
@@ -34,9 +36,10 @@ def page_count(address):
 # task that will run each hour (or another const time)
 def check_views():
     results = []
-    # for i in range(1, page_count(adress)):
-    for i in range(1, 2):
-        request = requests.get("http://www.olx.pl/uslugi-firmy/warszawa/?search%5Bdistrict_id%5D=353&page=7" + str(i))
+    print(page_count(adress + "1"))
+    for i in range(1, page_count(adress + "1")):
+    #for i in range(1, 2):
+        request = requests.get(adress + str(i))
         soup = BeautifulSoup(request.text, "html.parser")
 
         for link in soup.findAll('a', {'class': 'marginright5'}):
@@ -88,10 +91,10 @@ def check_views():
     df2.to_csv(sys.argv[1] + 'Top_10.csv', header=False)
     df2.to_html(sys.argv[1] + 'index.html', header=False)
 
-#scheduler = BlockingScheduler()
-#scheduler.add_job(check_views, 'interval', minutes=2)
-#scheduler.start()
-check_views()
+scheduler = BlockingScheduler()
+scheduler.add_job(check_views, 'interval', minutes=10)
+scheduler.start()
+#check_views()
 
 
 # if os.path.isfile('OLX_actual_hour.csv'):
