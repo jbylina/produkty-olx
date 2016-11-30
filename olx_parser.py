@@ -40,6 +40,7 @@ def check_views():
     for i in range(1, 160):
     #for i in range(1, 2):
         print("Parsing page no: " + str(i))
+        sys.stdout.flush()
         request = requests.get(main_page_url + str(i))
         soup = BeautifulSoup(request.text, "html.parser")
 
