@@ -37,7 +37,7 @@ def page_count(address):
 def check_views():
     results = []
     #print(page_count(main_page_url + "501"))
-    for i in range(1, 130):
+    for i in range(1, 165):
     #for i in range(1, 2):
         print("Parsing page no: " + str(i))
         request = requests.get(main_page_url + str(i))
@@ -93,7 +93,7 @@ def check_views():
     df2.to_html(sys.argv[1] + 'index.html', header=False)
 
 scheduler = BlockingScheduler()
-scheduler.add_job(check_views, 'interval', minutes=15)
+scheduler.add_job(check_views, 'interval', minutes=60)
 scheduler.start()
 #check_views()
 
