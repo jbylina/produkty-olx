@@ -9,6 +9,8 @@ from apscheduler.schedulers.blocking import BlockingScheduler
 from shutil import copyfile
 import sys
 
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def save_to_csv(array):
     file_new = sys.argv[1] + 'OLX_actual_hour.csv'
