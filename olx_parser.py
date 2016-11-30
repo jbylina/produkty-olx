@@ -39,6 +39,7 @@ def check_views():
     #print(page_count(main_page_url + "501"))
     for i in range(1, 130):
     #for i in range(1, 2):
+        print("Parsing page no: " + str(i))
         request = requests.get(main_page_url + str(i))
         soup = BeautifulSoup(request.text, "html.parser")
 
@@ -91,10 +92,10 @@ def check_views():
     df2.to_csv(sys.argv[1] + 'Top_10.csv', header=False)
     df2.to_html(sys.argv[1] + 'index.html', header=False)
 
-#scheduler = BlockingScheduler()
-#scheduler.add_job(check_views, 'interval', minutes=10)
-#scheduler.start()
-check_views()
+scheduler = BlockingScheduler()
+scheduler.add_job(check_views, 'interval', minutes=15)
+scheduler.start()
+#check_views()
 
 
 # if os.path.isfile('OLX_actual_hour.csv'):
