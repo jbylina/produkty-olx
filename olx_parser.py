@@ -8,9 +8,10 @@ import os.path
 from apscheduler.schedulers.blocking import BlockingScheduler
 from shutil import copyfile
 import sys
+#import importlib
 
-reload(sys)
-sys.setdefaultencoding('utf8')
+#importlib.reload(sys)
+#sys.setdefaultencoding('utf8')
 
 def save_to_csv(array):
     file_new = sys.argv[1] + 'OLX_actual_hour.csv'
@@ -35,7 +36,7 @@ def check_views():
     results = []
     # for i in range(1, page_count(adress)):
     for i in range(1, 2):
-        request = requests.get("http://www.olx.pl/uslugi-firmy/piaseczno/?page=" + str(i))
+        request = requests.get("http://www.olx.pl/uslugi-firmy/warszawa/?search%5Bdistrict_id%5D=353&page=7" + str(i))
         soup = BeautifulSoup(request.text, "html.parser")
 
         for link in soup.findAll('a', {'class': 'marginright5'}):
