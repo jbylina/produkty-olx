@@ -37,7 +37,7 @@ def page_count(address):
 def check_views():
     results = []
     #print(page_count(main_page_url + "501"))
-    for i in range(1, 2):
+    for i in range(1, 160):
     #for i in range(1, 2):
         print("Parsing page no: " + str(i))
         request = requests.get(main_page_url + str(i))
