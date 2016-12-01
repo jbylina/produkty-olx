@@ -47,9 +47,11 @@ def check_views():
         for link in soup.findAll('a', {'class': 'marginright5'}):
             url = link['href']
             print("Subpage url: " + url)
+            sys.stdout.flush()
             # check only not promoted links
             if ";promoted" not in url:
                 print("In subpage url: " + url)
+                sys.stdout.flush()
                 # get inside link from main page
                 request = requests.get(url)
                 soup2 = BeautifulSoup(request.text, "html.parser")
