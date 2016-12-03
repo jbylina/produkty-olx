@@ -54,6 +54,10 @@ def check_views():
                 sys.stdout.flush()
                 # get inside link from main page
                 request = requests.get(url)
+                # save source code to file
+                f_source= open(sys.argv[1] + "page.html", "w")
+                print(request.content, file=f_source)
+
                 soup2 = BeautifulSoup(request.text, "html.parser")
 
                 # find bottom bar div
