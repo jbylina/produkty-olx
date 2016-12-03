@@ -37,7 +37,7 @@ def page_count(address):
 def check_views():
     results = []
     #print(page_count(main_page_url + "501"))
-    for i in range(1, 160):
+    for i in range(1, 163):
     #for i in range(1, 2):
         print("Parsing page no: " + str(i))
         sys.stdout.flush()
@@ -62,9 +62,14 @@ def check_views():
 
                 # find bottom bar div
                 bottomBar = soup2.find('div', {'id': 'offerbottombar'})
-
+                if bottomBar is None:
+                    print("ERROR: No bottomBar")
+                    break
                 # extract children div
                 bottomBarChildren = bottomBar.findAll('div', {'class': 'pdingtop10'})
+                if not bottomBarChildren:
+                    print("ERROR: No bottomBarChildren")
+                    break
                 offer_count = bottomBarChildren[1].text.strip().split('Wyświetleń:', 1)[1]
 
                 # text_with_id example value: 'ID ogłoszenia: 1234423432'
@@ -83,6 +88,7 @@ def check_views():
 
     # remove single rows (just added or removed during last hour)
     df = df[df.groupby('ID').ID.transform(len) > 1]
+    print(df[df.groupby('ID').ID.transform(len) > 2])
 
     # unnecessary now
     del df['Data']
