@@ -36,7 +36,7 @@ def page_count(address):
 # task that will run each hour (or another const time)
 def check_views():
     results = []
-    url_list = []
+    url_shortened_list = []
     #print(page_count(main_page_url + "501"))
     for i in range(1, 48):
     #for i in range(1, 2):
@@ -51,10 +51,12 @@ def check_views():
             sys.stdout.flush()
 
             # check only not promoted links and not already visited
-            if ";promoted" not in url and url not in url_list:
+            url_shortened = url.split('#')[0]
+            if ";promoted" not in url and url_shortened not in url_shortened_list:
                 # add url to list
-                url_list.extend(url)
+                url_shortened_list.append(url_shortened)
                 print("In subpage url: " + url)
+                print("In subpage shortened url: " + url_shortened)
                 sys.stdout.flush()
                 # get inside link from main page
                 request = requests.get(url)
