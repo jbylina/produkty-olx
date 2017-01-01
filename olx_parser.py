@@ -3,26 +3,52 @@ from bs4 import BeautifulSoup
 from time import gmtime, strftime
 import requests
 import csv
-import pandas as pd
-import os.path
-from apscheduler.schedulers.blocking import BlockingScheduler
-from shutil import copyfile
 import sys
-#import importlib
+import pandas as pd
 
-#importlib.reload(sys)
-#sys.setdefaultencoding('utf8')
 
 main_page_url = "https://www.olx.pl/uslugi-firmy/piaseczno/?page="
+results = []
+obs_count = 5;
 
-def save_to_csv(array):
-    file_new = sys.argv[1] + 'OLX_actual_hour.csv'
-    file_old = sys.argv[1] + 'OLX_one_hour_ago.csv'
-    copyfile(file_new, file_old)
-    f = open(file_new, "w")
+
+def read_csv():
+    global results
+    results = pd.read_csv(sys.argv[1] + 'OLX_actual_hour.csv')
+
+
+def save_to_csv():
+    file = sys.argv[1] + 'OLX_actual_hour.csv'
+    f = open(file, "w")
     writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
-    for item in array:
-        writer.writerow(item)
+    for entry in results:
+        writer.writerow(entry)
+
+
+def shift_results():
+    for entry in results:
+        for i in range(0, obs_count - 1):
+            entry[2 + i*2] = entry[4 + i*2]
+            entry[3 + i*2] = entry[5 + i*2]
+
+
+def update_results(id, url, time, views):
+    for entry in results:
+        if entry[1] == id:
+            entry[2*obs_count] = time;
+            entry[2*obs_count + 1] = views;
+            return
+    # if there is no entry in the list already
+    new_entry = [];
+    new_entry.append(id)
+    new_entry.append(url)
+    for i in range(0, obs_count - 1):
+        new_entry.append(-1)
+        new_entry.append(-1)
+    new_entry.append(time)
+    new_entry.append(views)
+    results.append(new_entry)
+
 
 
 # sprawdzanie liczby stron - zrobił Dominik
@@ -35,11 +61,8 @@ def page_count(address):
 
 # task that will run each hour (or another const time)
 def check_views():
-    results = []
     url_shortened_list = []
-    #print(page_count(main_page_url + "501"))
-    for i in range(1, 48):
-    #for i in range(1, 2):
+    for i in range(1, 2):
         print("Parsing page no: " + str(i))
         sys.stdout.flush()
         request = requests.get(main_page_url + str(i))
@@ -60,9 +83,6 @@ def check_views():
                 sys.stdout.flush()
                 # get inside link from main page
                 request = requests.get(url)
-                # save source code to file
-                #f_source= open(sys.argv[1] + "page.html", "w")
-                #print(request.content, file=f_source)
 
                 soup2 = BeautifulSoup(request.text, "html.parser")
 
@@ -80,43 +100,45 @@ def check_views():
 
                 # text_with_id example value: 'ID ogłoszenia: 1234423432'
                 text_with_offer_id = soup2.find('div', {'class': 'offer-titlebox__details'}).find('small').text
-
                 offer_id = text_with_offer_id.strip().split(" ")[-1]
 
-                results.append([int(offer_id), url, strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count)])
+                update_results(int(offer_id), url,strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count))
 
-    save_to_csv(results)
+read_csv()
+shift_results()
+check_views()
+save_to_csv()
 
     # create result file (comparing new and old file
-    df_actual = pd.read_csv(sys.argv[1] + 'OLX_actual_hour.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
-    df_ago = pd.read_csv(sys.argv[1] + 'OLX_one_hour_ago.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
-    df = pd.concat([df_actual, df_ago])
+    #df_actual = pd.read_csv(sys.argv[1] + 'OLX_actual_hour.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
+    #df_ago = pd.read_csv(sys.argv[1] + 'OLX_one_hour_ago.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
+    #df = pd.concat([df_actual, df_ago])
 
     # remove single rows (just added or removed during last hour)
-    df = df[df.groupby('ID').ID.transform(len) > 1]
-    print(df[df.groupby('ID').ID.transform(len) > 2])
+    #df = df[df.groupby('ID').ID.transform(len) > 1]
+    #print(df[df.groupby('ID').ID.transform(len) > 2])
 
     # unnecessary now
-    del df['Data']
+    #del df['Data']
 
     # Ciezko odejmowac wartosci miedzy roznymi wierszami, wspomoglem sie stworzeniem kolumny max i min, aby pozniej stworzyc kolumne z ich roznicy
-    df = df.groupby(['ID', 'Link']).Liczba_wyswietlen.agg(['max', 'min'])
-    df['Liczba_wyswietlen'] = df['max'] - df['min']
+    #df = df.groupby(['ID', 'Link']).Liczba_wyswietlen.agg(['max', 'min'])
+    #df['Liczba_wyswietlen'] = df['max'] - df['min']
 
     # unnecessary to result
-    del df['max']
-    del df['min']
+    #del df['max']
+    #del df['min']
 
     # sort by 30 best results and save
-    df = df.sort_values(['Liczba_wyswietlen'], ascending=[False])
-    df2 = df[0:30]
-    df2.to_csv(sys.argv[1] + 'Top_10.csv', header=False)
-    df2.to_html(sys.argv[1] + 'index.html', header=False)
+    #df = df.sort_values(['Liczba_wyswietlen'], ascending=[False])
+    #df2 = df[0:30]
+    #df2.to_csv(sys.argv[1] + 'Top_10.csv', header=False)
+    #df2.to_html(sys.argv[1] + 'index.html', header=False)
 
 #scheduler = BlockingScheduler()
 #scheduler.add_job(check_views, 'interval', minutes=60)
 #scheduler.start()
-check_views()
+
 
 
 # if os.path.isfile('OLX_actual_hour.csv'):
