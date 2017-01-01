@@ -104,7 +104,7 @@ def check_views():
 
                 update_results(int(offer_id), url,strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count))
 
-read_csv()
+#read_csv()
 shift_results()
 check_views()
 save_to_csv()
