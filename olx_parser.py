@@ -4,51 +4,57 @@ from time import gmtime, strftime
 import requests
 import csv
 import sys
-import pandas as pd
+#import pandas as pd
 
 
 main_page_url = "https://www.olx.pl/uslugi-firmy/piaseczno/?page="
+data_file = 'olx_data.csv'
 results = []
 obs_count = 5;
 
 
 def read_csv():
     global results
-    results = pd.read_csv(sys.argv[1] + 'OLX_actual_hour.csv')
+    with open(sys.argv[1] + data_file, 'r', newline='') as csvfile:
+        csvreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+        for row in csvreader:
+            if row:
+                row[0] = int(row[0])
+                for i in range(0, obs_count):
+                    row[3 + i * 2] = int(row[3 + i * 2])
+                results.append(row)
 
 
 def save_to_csv():
-    file = sys.argv[1] + 'OLX_actual_hour.csv'
-    f = open(file, "w")
-    writer = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
-    for entry in results:
-        writer.writerow(entry)
+    global results
+    with open(sys.argv[1] + data_file, 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=' ', quotechar='|')
+        for row in results:
+            csvwriter.writerow(row)
 
 
 def shift_results():
-    for entry in results:
+    for row in results:
         for i in range(0, obs_count - 1):
-            entry[2 + i*2] = entry[4 + i*2]
-            entry[3 + i*2] = entry[5 + i*2]
+            row[2 + i*2] = row[4 + i*2]
+            row[3 + i*2] = row[5 + i*2]
 
 
 def update_results(id, url, time, views):
-    for entry in results:
-        if entry[1] == id:
-            entry[2*obs_count] = time;
-            entry[2*obs_count + 1] = views;
+    for row in results:
+        if row[0] == id:
+            row[2*obs_count] = time;
+            row[2*obs_count + 1] = views;
             return
     # if there is no entry in the list already
-    new_entry = [];
-    new_entry.append(id)
-    new_entry.append(url)
+    new_row = [id, url];
+    #print(type(new_row[0]))
     for i in range(0, obs_count - 1):
-        new_entry.append(-1)
-        new_entry.append(-1)
-    new_entry.append(time)
-    new_entry.append(views)
-    results.append(new_entry)
-
+        new_row.append(-1)
+        new_row.append(-1)
+    new_row.append(time)
+    new_row.append(views)
+    results.append(new_row)
 
 
 # sprawdzanie liczby stron - zrobił Dominik
@@ -90,12 +96,12 @@ def check_views():
                 bottomBar = soup2.find('div', {'id': 'offerbottombar'})
                 if bottomBar is None:
                     print("ERROR: No bottomBar")
-                    break
+                    continue
                 # extract children div
                 bottomBarChildren = bottomBar.findAll('div', {'class': 'pdingtop10'})
                 if not bottomBarChildren:
                     print("ERROR: No bottomBarChildren")
-                    break
+                    continue
                 offer_count = bottomBarChildren[1].text.strip().split('Wyświetleń:', 1)[1]
 
                 # text_with_id example value: 'ID ogłoszenia: 1234423432'
@@ -104,48 +110,12 @@ def check_views():
 
                 update_results(int(offer_id), url,strftime("%Y-%m-%d %H:%M:%S", gmtime()), int(offer_count))
 
-#read_csv()
+read_csv()
+if results:
+    print(results[1])
 shift_results()
 check_views()
 save_to_csv()
 
-    # create result file (comparing new and old file
-    #df_actual = pd.read_csv(sys.argv[1] + 'OLX_actual_hour.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
-    #df_ago = pd.read_csv(sys.argv[1] + 'OLX_one_hour_ago.csv', names=['ID', 'Link', 'Data', 'Liczba_wyswietlen'])
-    #df = pd.concat([df_actual, df_ago])
-
-    # remove single rows (just added or removed during last hour)
-    #df = df[df.groupby('ID').ID.transform(len) > 1]
-    #print(df[df.groupby('ID').ID.transform(len) > 2])
-
-    # unnecessary now
-    #del df['Data']
-
-    # Ciezko odejmowac wartosci miedzy roznymi wierszami, wspomoglem sie stworzeniem kolumny max i min, aby pozniej stworzyc kolumne z ich roznicy
-    #df = df.groupby(['ID', 'Link']).Liczba_wyswietlen.agg(['max', 'min'])
-    #df['Liczba_wyswietlen'] = df['max'] - df['min']
-
-    # unnecessary to result
-    #del df['max']
-    #del df['min']
-
-    # sort by 30 best results and save
-    #df = df.sort_values(['Liczba_wyswietlen'], ascending=[False])
-    #df2 = df[0:30]
-    #df2.to_csv(sys.argv[1] + 'Top_10.csv', header=False)
-    #df2.to_html(sys.argv[1] + 'index.html', header=False)
-
-#scheduler = BlockingScheduler()
-#scheduler.add_job(check_views, 'interval', minutes=60)
-#scheduler.start()
-
-
-
-# if os.path.isfile('OLX_actual_hour.csv'):
-#    writer = csv.writer('OLX_actual_hour.csv', quoting=csv.QUOTE_NONNUMERIC)
-#    for item in array:
-#        writer.writerow(item)
-
-
-
-
+#for row in results:
+#    print(type(row[0]))
