@@ -126,7 +126,7 @@ def page_count(address):
 # task that will run each hour (or another const time)
 def check_views():
     url_shortened_list = []
-    for i in range(1, 2):
+    for i in range(1, 51):
         print("Parsing page no: " + str(i))
         sys.stdout.flush()
         request = requests.get(main_page_url + str(i))
