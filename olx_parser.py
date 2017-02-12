@@ -11,7 +11,7 @@ main_page_url = "https://www.olx.pl/uslugi-firmy/piaseczno/?page="
 data_file = 'olx_data.csv'
 results = []
 obs_count = 5;
-top_number = 3;
+top_number = 5;
 
 
 def read_csv():
@@ -85,14 +85,12 @@ def make_html():
     # sort list
     #results.sort(key=results[6])
     #print(results)
-    #print(sorted(results, key=lambda sum: results[-1]))
-
+    sorted(results, key=lambda sum: results[-1])
 
 
     # prepare some data
-    x = [1, 2, 3, 4, 5]
-    y = [6, 7, 2, 4, 5]
-    y2 = [5, 5, 3, 2, 4]
+    x = range(1,obs_count)
+
 
     # output to static HTML file
     output_file("index.html")
@@ -101,9 +99,17 @@ def make_html():
     p = figure(title="simple line example", x_axis_label='x', y_axis_label='y')
 
     # add a line renderer with legend and line thickness
-    for i in range(0, top_number):
-        p.line(x, y, legend="Temp.", line_width=2)
-        p.line(x, y2, legend="Temp2", line_width=2)
+    for row_idx in range(0, top_number):
+        y = []
+        for i in range(0, obs_count):
+            if results[-1-row_idx][4 + i * 3] is not -1:
+                y.append(results[-1-row_idx][4 + i * 3])
+            else:
+                y.append(0)
+        p.line(x, y, legend=str(results[-1-row_idx][0]), line_width=2)
+        print(results[-1-row_idx])
+        print(y)
+
 
     # show the results
     show(p)
