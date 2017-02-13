@@ -96,7 +96,7 @@ def make_html():
     output_file("index.html")
 
     # create a new plot with a title and axis labels
-    p = figure(title="simple line example", x_axis_label='x', y_axis_label='y')
+    p = figure(title="OLX TOP", x_axis_label='x', y_axis_label='y')
 
     # add a line renderer with legend and line thickness
     for row_idx in range(0, top_number):
