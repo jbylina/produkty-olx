@@ -10,6 +10,7 @@ from bokeh.plotting import figure, output_file, show
 main_page_url = "https://www.olx.pl/uslugi-firmy/piaseczno/?page="
 data_file = 'olx_data.csv'
 results = []
+results_sorted = []
 obs_count = 5;
 top_number = 5;
 
@@ -28,10 +29,10 @@ def read_csv():
 
 
 def save_to_csv():
-    global results
+    global results_sorted
     with open(sys.argv[1] + data_file, 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=' ', quotechar='|')
-        for row in results:
+        for row in results_sorted:
             csvwriter.writerow(row)
 
 
@@ -85,8 +86,6 @@ def make_html():
     # sort list
     #results.sort(key=results[6])
     #print(results)
-    sorted(results, key=lambda sum: results[-1])
-
 
     # prepare some data
     x = range(1,obs_count)
@@ -102,12 +101,12 @@ def make_html():
     for row_idx in range(0, top_number):
         y = []
         for i in range(0, obs_count):
-            if results[-1-row_idx][4 + i * 3] is not -1:
-                y.append(results[-1-row_idx][4 + i * 3])
+            if results_sorted[-1-row_idx][4 + i * 3] is not -1:
+                y.append(results_sorted[-1-row_idx][4 + i * 3])
             else:
                 y.append(0)
-        p.line(x, y, legend=str(results[-1-row_idx][0]), line_width=2)
-        print(results[-1-row_idx])
+        p.line(x, y, legend=str(results_sorted[-1-row_idx][0]), line_width=2)
+        print(results_sorted[-1-row_idx])
         print(y)
 
 
@@ -127,6 +126,7 @@ def page_count(address):
 def check_views():
     url_shortened_list = []
     for i in range(1, 51):
+    #for i in range(1,2):
         print("Parsing page no: " + str(i))
         sys.stdout.flush()
         request = requests.get(main_page_url + str(i))
@@ -172,6 +172,7 @@ read_csv()
 shift_results()
 check_views()
 count_sum()
-save_to_csv()
+results_sorted = sorted(results, key=lambda results: results[-1])
 make_html()
+save_to_csv()
 
