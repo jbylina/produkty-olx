@@ -92,7 +92,7 @@ def make_html():
 
 
     # output to static HTML file
-    output_file("index.html")
+    output_file(sys.argv[1] + "index.html")
 
     # create a new plot with a title and axis labels
     p = figure(title="OLX TOP", x_axis_label='x', y_axis_label='y')
